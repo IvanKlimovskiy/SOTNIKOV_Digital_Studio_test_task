@@ -1,0 +1,27 @@
+.postItem {
+  margin: auto;
+  min-height: 450px;
+  transition: .5s;
+}
+
+.checkedPost {
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.imagesWrapper {
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 20px;
+  display: flex;
+}
+
+.image {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.checkbox {
+  cursor: pointer;
+  display: flex;
+}
