@@ -8,7 +8,8 @@ import { useAppSelector } from '../../hooks';
 import { useDispatch } from 'react-redux';
 import { showModal } from '../../services/slices/Modal/Modal';
 import Spinner from '../../components/Spinner/Spinner';
-import { Post } from '../../services/slices/Posts/Posts.types';
+import { addCheckedEntitiesToState } from '../../services/slices/Favourites/Favourites';
+import { clearCheckedPosts } from '../../services/slices/Posts/Posts';
 
 function Posts() {
   const paginationItems = [];
@@ -27,7 +28,8 @@ function Posts() {
   };
   const [postsElement, setPostsElement] = useState<React.JSX.Element>(<></>);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const currentPostIds = useAppSelector((state) => state.posts.currentPostIds);
+  const [isDisabledButton, setIsDisabledButton] = useState(false);
+  const currentPostIds = useAppSelector((state) => state.posts.checkedPosts);
   const loading = useAppSelector((state) => state.posts.loading);
   const dispatch = useDispatch();
 
@@ -47,6 +49,15 @@ function Posts() {
         isSinglePostSelected: false,
       })
     );
+  }
+
+  function addCheckedPostsToFavourites() {
+    setIsDisabledButton(true);
+    dispatch(addCheckedEntitiesToState());
+    dispatch(clearCheckedPosts());
+    setTimeout(() => {
+      setIsDisabledButton(false);
+    }, 1000);
   }
 
   for (let i = 1; i <= 10; i++) {
@@ -79,7 +90,9 @@ function Posts() {
             <Button onClick={onClickButtonHandler} className={'btn-danger mt-5'}>
               Удалить выбранные x{currentPostIds.length}
             </Button>
-            <Button className={'mt-5 mx-5'}>Добавить в избранное x{currentPostIds.length}</Button>
+            <Button disabled={isDisabledButton} onClick={addCheckedPostsToFavourites} className={'mt-5 mx-5'}>
+              {isDisabledButton ? 'Добавлено' : `Добавить в избранное x${currentPostIds.length}`}
+            </Button>
           </div>
         )}
       </Transition>

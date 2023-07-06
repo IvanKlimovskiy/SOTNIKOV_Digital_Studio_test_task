@@ -12,7 +12,7 @@ const initialState: PostsState = {
   loading: true,
   posts: [],
   users: [],
-  currentPostIds: [],
+  checkedPosts: [],
 };
 
 const posts = createSlice({
@@ -23,7 +23,7 @@ const posts = createSlice({
       state.posts = state.posts.filter((post) => {
         return post.id !== action.payload;
       });
-      state.currentPostIds = state.currentPostIds.filter((id) => {
+      state.checkedPosts = state.checkedPosts.filter((id) => {
         return id !== action.payload;
       });
     },
@@ -34,15 +34,18 @@ const posts = createSlice({
           return post.id !== id;
         });
       });
-      state.currentPostIds = [];
+      state.checkedPosts = [];
     },
-    setCurrentPost: (state, action: PayloadAction<number>) => {
-      state.currentPostIds.push(action.payload);
+    addCheckedPost: (state, action: PayloadAction<number>) => {
+      state.checkedPosts.push(action.payload);
     },
-    removeCurrentPost: (state, action: PayloadAction<number>) => {
-      state.currentPostIds = state.currentPostIds.filter((postId) => {
-        return postId !== action.payload;
+    removeCheckedPost: (state, action: PayloadAction<number>) => {
+      state.checkedPosts = state.checkedPosts.filter((post) => {
+        return post !== action.payload;
       });
+    },
+    clearCheckedPosts: (state) => {
+      state.checkedPosts = [];
     },
   },
   extraReducers: (builder) => {
@@ -67,5 +70,5 @@ const posts = createSlice({
 
 const { reducer, actions } = posts;
 
-export const { removePost, setCurrentPost, removeCurrentPost, removePosts } = actions;
+export const { removePost, addCheckedPost, removeCheckedPost, removePosts, clearCheckedPosts } = actions;
 export default reducer;

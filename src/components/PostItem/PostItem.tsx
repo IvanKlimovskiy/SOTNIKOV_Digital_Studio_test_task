@@ -1,19 +1,28 @@
 import { Card, Button } from 'react-bootstrap';
 import styles from './PostItem.module.css';
 import { PostComponent, DataCommentaries } from './PostItem.types';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { favourite, addedToFavourite, edit, comment } from '../../assets/images';
 import getData from '../../utils/getData';
 import { capitalizeFirstLetter } from '../../utils/capitalizeFirstLetter';
 import { Transition } from 'react-transition-group';
 import { showModal } from '../../services/slices/Modal/Modal';
-import { setCurrentPost, removeCurrentPost } from '../../services/slices/Posts/Posts';
-import { addEntity } from '../../services/slices/Favourites/Favourites';
+import { addCheckedPost, removeCheckedPost } from '../../services/slices/Posts/Posts';
+import {
+  addEntity,
+  removeEntity,
+  removeCheckedEntity,
+  addCheckedEntity,
+} from '../../services/slices/Favourites/Favourites';
+
 const PostItem: React.FC<PostComponent> = ({ post }) => {
   const [isAddedToFavourites, setIsAddedToFavourites] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [isFirstRender, setIsFirstRender] = useState(true);
   const { users } = useAppSelector((store) => store.posts);
+  const favouritePosts = useAppSelector((state) => state.favourites.posts);
+  const checkedPosts = useAppSelector((state) => state.posts.checkedPosts);
 
   const duration = 500;
   const nodeRef = useRef(null);
@@ -31,21 +40,45 @@ const PostItem: React.FC<PostComponent> = ({ post }) => {
     exited: { opacity: 0 },
   };
 
-  function addToFavouritesHandler() {
-    setIsAddedToFavourites((isAddedToFavourites) => !isAddedToFavourites);
-    dispatch(addEntity(post))
-  }
-
-  function checkHandler() {
-    setIsChecked((isChecked) => {
-      if (isChecked) {
-        dispatch(removeCurrentPost(post.id));
-      } else {
-        dispatch(setCurrentPost(post.id));
-      }
-      return !isChecked;
+  function checkIsCheckedPost() {
+    return checkedPosts.some((id) => {
+      return id === post.id;
     });
   }
+
+  function checkIsAddedToFavourites() {
+    return favouritePosts.some((el) => {
+      return el.id === post.id;
+    });
+  }
+
+  function addToFavouritesHandler() {
+    setIsAddedToFavourites((prevAddedToFavourites) => !prevAddedToFavourites);
+  }
+
+  useEffect(() => {
+    if (isAddedToFavourites) {
+      dispatch(addEntity(post));
+      setIsFirstRender(false);
+    } else if (!isAddedToFavourites && !isFirstRender) {
+      dispatch(removeEntity(post));
+    }
+  }, [isAddedToFavourites]);
+
+  function checkHandler() {
+    setIsChecked((prevChecked) => !prevChecked);
+  }
+
+  useEffect(() => {
+    if (isChecked) {
+      dispatch(addCheckedPost(post.id));
+      dispatch(addCheckedEntity(post));
+      setIsFirstRender(false);
+    } else if (!isChecked && !isFirstRender) {
+      dispatch(removeCheckedPost(post.id));
+      dispatch(removeCheckedEntity(post));
+    }
+  }, [isChecked]);
 
   function removePostHandler() {
     dispatch(
@@ -65,7 +98,7 @@ const PostItem: React.FC<PostComponent> = ({ post }) => {
 
   return (
     <>
-      <Card className={`${styles.postItem} ${isChecked ? styles.checkedPost : null}`}>
+      <Card className={`${styles.postItem} ${checkIsCheckedPost() ? styles.checkedPost : null}`}>
         <Card.Body className={'d-flex flex-column'}>
           <Card.Header style={{ cursor: 'pointer' }} onClick={checkHandler}>
             <Card.Title>{title}</Card.Title>
@@ -79,13 +112,13 @@ const PostItem: React.FC<PostComponent> = ({ post }) => {
               <Card.Img
                 className={styles.image}
                 onClick={addToFavouritesHandler}
-                src={isAddedToFavourites ? addedToFavourite : favourite}
+                src={isAddedToFavourites || checkIsAddedToFavourites() ? addedToFavourite : favourite}
               />
               <Card.Img className={styles.image} src={edit} />
               <Card.Img onClick={getComm} className={styles.image} src={comment} />
             </div>
           </Card.Footer>
-          <Transition nodeRef={nodeRef} in={isChecked} timeout={duration} mountOnEnter unmountOnExit>
+          <Transition nodeRef={nodeRef} in={checkIsCheckedPost()} timeout={duration} mountOnEnter unmountOnExit>
             {(state) => (
               <Button
                 onClick={removePostHandler}

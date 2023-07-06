@@ -32,5 +32,5 @@ export type PostsState = {
   loading: boolean;
   posts: Post[];
   users: User[];
-  currentPostIds: number[];
+  checkedPosts: number[];
 };

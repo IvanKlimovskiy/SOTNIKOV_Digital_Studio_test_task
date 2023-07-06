@@ -6,7 +6,7 @@ import { removePost, removePosts } from '../../services/slices/Posts/Posts';
 
 const ModalFC = () => {
   const isShowed = useAppSelector((state) => state.modal.isShowed);
-  const currentPostIds = useAppSelector((state) => state.posts.currentPostIds);
+  const currentPostIds = useAppSelector((state) => state.posts.checkedPosts);
   const postId = useAppSelector((state) => state.modal.postId);
   const modalTitle = useAppSelector((state) => state.modal.modalTitle);
   const isSinglePostSelected = useAppSelector((state) => state.modal.isSinglePostSelected);
